@@ -10,7 +10,8 @@ from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.by import By
-
+import openpyxl #libreria externa
+from lectorExcel import cargarArchivo
 
 ##########################################################
 #verificar version de google chrome instalada
@@ -94,6 +95,11 @@ def scrape(ubicacion):
     WebDriverWait(driver, 5)\
         .until(EC.element_to_be_clickable((By.CSS_SELECTOR,
                                             'input#searchboxinput')))\
+                                            .clear()
+
+    WebDriverWait(driver, 5)\
+        .until(EC.element_to_be_clickable((By.CSS_SELECTOR,
+                                            'input#searchboxinput')))\
                                             .send_keys(f'{ubicacion}')
 
     WebDriverWait(driver, 5)\
@@ -112,12 +118,16 @@ def scrape(ubicacion):
 ##########################################################
 # main
 ##########################################################
-coordenadas = ""
 directorioActual = os.getcwdb()
 directorioActual = directorioActual.decode('utf-8').strip()
 direccionDriver = directorioActual+"\drivers\\"
 
 version = verificar_drivers_actualizados(verificaVersionChrome(),verificarDriverOnline())
+
+#leer archivo excel
+libro = openpyxl.load_workbook(cargarArchivo())
+pagina = libro.active
+libro.close
 
 # Opciones de navegación
 options =  webdriver.ChromeOptions()
@@ -129,16 +139,19 @@ driver = webdriver.Chrome(
     service=Service(executable_path=direccionDriver+"chromedriver_win32_" + version + ".exe"), 
     options = options)
 
+
 #inicializar navegador
 driver.get("https://www.google.com/maps")
 
-coordenadas = scrape("rio balsas 5304, jardines de san manuel")
+for i in range(2,4):
+    lugar,calle = pagina[f'D{i}:E{i}'][0]
+    print(calle.value + ", " + lugar.value)
+    coordenadas = scrape(calle.value + ", " + lugar.value)
+    print(coordenadas)
+    time.sleep(1)
 
-print(coordenadas)
 
 time.sleep(5)
-
-
 driver.quit()
 
 
