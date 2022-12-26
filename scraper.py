@@ -96,17 +96,17 @@ def get_geocoder(url_location): # gets geographical lat/long coordinates
 # geocoder
 ##########################################################
 def scrape(ubicacion):
-    WebDriverWait(driver, 5)\
+    WebDriverWait(driver, 15)\
         .until(EC.element_to_be_clickable((By.CSS_SELECTOR,
                                             'input#searchboxinput')))\
                                             .clear()
 
-    WebDriverWait(driver, 5)\
+    WebDriverWait(driver, 15)\
         .until(EC.element_to_be_clickable((By.CSS_SELECTOR,
                                             'input#searchboxinput')))\
                                             .send_keys(f'{ubicacion}')
 
-    WebDriverWait(driver, 5)\
+    WebDriverWait(driver, 15)\
         .until(EC.element_to_be_clickable((By.CSS_SELECTOR,
                                             'button#searchbox-searchbutton')))\
                                             .click()
@@ -131,7 +131,7 @@ version = verificar_drivers_actualizados(verificaVersionChrome(),verificarDriver
 #leer archivo excel
 archivo = cargarArchivo()
 libro = openpyxl.load_workbook(archivo)
-pagina = libro.active
+pagina = libro['AÑO 2018']
 libro.close
 
 # Opciones de navegación
@@ -150,16 +150,15 @@ driver.get("https://www.google.com/maps")
 
 coordenadas = []
 
-filaInicio = 2
-filaFinal = 6
-colInic = 'D'
-colFin = 'E'
-colCoords = 'F'
+filaInicio = 1200
+filaFinal = 1286
+colInic = 'F'
+colFin = 'G'
+colCoords = 'H'
 
 for i in range(filaInicio,filaFinal):
-    lugar,calle = pagina[f'{colInic}{i}:{colFin}{i}'][0]
-    print(calle.value + ", " + lugar.value)
-    pagina[f'{colCoords}{i}'] = scrape(calle.value + ", " + lugar.value)
+    lugar,ubicacion = pagina[f'{colInic}{i}:{colFin}{i}'][0]
+    pagina[f'{colCoords}{i}'] = scrape(lugar.value + ", " + ubicacion.value + " izucar de matamoros, puebla")
     #time.sleep(1)
 
 libro.save(archivo)
