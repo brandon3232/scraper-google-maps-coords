@@ -81,10 +81,14 @@ def get_geocoder(url_location): # gets geographical lat/long coordinates
             coords = re.search(r"!3d-?\d\d?\.\d{4,8}!4d-?\d\d?\.\d{4,8}",
                             url_location).group()
             coord = coords.split('!3d')[1]
-            return tuple(coord.split('!4d'))
+
+            tup = tuple(coord.split('!4d'))
+            delim = ','
+
+            return delim.join(tup)
 
         except (TypeError, AttributeError):
-            return  ("", "")
+            return  "0,0"
 
 
 
@@ -125,7 +129,8 @@ direccionDriver = directorioActual+"\drivers\\"
 version = verificar_drivers_actualizados(verificaVersionChrome(),verificarDriverOnline())
 
 #leer archivo excel
-libro = openpyxl.load_workbook(cargarArchivo())
+archivo = cargarArchivo()
+libro = openpyxl.load_workbook(archivo)
 pagina = libro.active
 libro.close
 
@@ -143,17 +148,23 @@ driver = webdriver.Chrome(
 #inicializar navegador
 driver.get("https://www.google.com/maps")
 
-for i in range(2,4):
-    lugar,calle = pagina[f'D{i}:E{i}'][0]
+coordenadas = []
+
+filaInicio = 2
+filaFinal = 6
+colInic = 'D'
+colFin = 'E'
+colCoords = 'F'
+
+for i in range(filaInicio,filaFinal):
+    lugar,calle = pagina[f'{colInic}{i}:{colFin}{i}'][0]
     print(calle.value + ", " + lugar.value)
-    coordenadas = scrape(calle.value + ", " + lugar.value)
-    print(coordenadas)
-    time.sleep(1)
+    pagina[f'{colCoords}{i}'] = scrape(calle.value + ", " + lugar.value)
+    #time.sleep(1)
 
+libro.save(archivo)
 
-time.sleep(5)
+time.sleep(3)
 driver.quit()
-
-
 
 
