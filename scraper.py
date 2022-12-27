@@ -96,25 +96,33 @@ def get_geocoder(url_location): # gets geographical lat/long coordinates
 # geocoder
 ##########################################################
 def scrape(ubicacion):
-    WebDriverWait(driver, 15)\
-        .until(EC.element_to_be_clickable((By.CSS_SELECTOR,
-                                            'input#searchboxinput')))\
-                                            .clear()
+    try:
+        WebDriverWait(driver, 15)\
+            .until(EC.element_to_be_clickable((By.CSS_SELECTOR,
+                                                'input#searchboxinput')))\
+                                                .clear()
 
-    WebDriverWait(driver, 15)\
-        .until(EC.element_to_be_clickable((By.CSS_SELECTOR,
-                                            'input#searchboxinput')))\
-                                            .send_keys(f'{ubicacion}')
+        WebDriverWait(driver, 15)\
+            .until(EC.element_to_be_clickable((By.CSS_SELECTOR,
+                                                'input#searchboxinput')))\
+                                                .send_keys(f'{ubicacion}')
 
-    WebDriverWait(driver, 15)\
-        .until(EC.element_to_be_clickable((By.CSS_SELECTOR,
-                                            'button#searchbox-searchbutton')))\
-                                            .click()
+        WebDriverWait(driver, 15)\
+            .until(EC.element_to_be_clickable((By.CSS_SELECTOR,
+                                                'button#searchbox-searchbutton')))\
+                                                .click()
 
-    time.sleep(3) #TODO: probar si es suficiente tiempo para que cargue url
+        time.sleep(3) #TODO: probar si es suficiente tiempo para que cargue url
 
-    return get_geocoder(driver.current_url)
+        return get_geocoder(driver.current_url)
 
+    except:
+        WebDriverWait(driver, 15)\
+            .until(EC.element_to_be_clickable((By.CSS_SELECTOR,
+                                                'button.YismEf')))\
+                                                .click()
+                                                
+        return "0,0"
 
 
 
