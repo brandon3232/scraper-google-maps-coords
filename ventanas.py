@@ -1,11 +1,12 @@
 import tkinter
-from tkinter import ttk
 from tkinter import filedialog
+from tkinter import ttk
+from scraper import scrapear
 
 ##########################################################
 #seleccionar archivo a utilizar
 ##########################################################
-def cargarArchivo(labelTextFile):
+def cargarArchivo():
     filename = filedialog.askopenfilename(initialdir = "/",
                                             title = "Selecciona el archivo excel a usar",
                                             filetypes = (("Excel",
@@ -13,73 +14,101 @@ def cargarArchivo(labelTextFile):
                                                         ("all files",
                                                             "*.*")))
     labelTextFile['text'] = filename
+    
 
+##########################################################
+#escrapear
+##########################################################
+def llamarScraper():
+    archivo = labelTextFile["text"]
+    filaInicio = int(textInitRow.get())
+    filaFinal = int(textEndRow.get())
+    colInic = textInitColum.get()
+    colFin = textEndColum.get()
+    colCoords = textColumWrite.get()
+    libro = textNameBook.get()
+
+    scrapear(archivo,libro , filaInicio, filaFinal, colInic, colFin, colCoords)
 
 ##########################################################
 #crear ventana
 ##########################################################
-def crearVentana():
 
-    #creacion de ventana
-    ventana = tkinter.Tk()
+filaInicio = 0
+filaFinal = 1
+colInic = ''
+colFin = ''
+colCoords = ''
+libro=""
 
-    ventana.title("scraper google maps")
-    ventana.geometry("600x550+350+150")
-    ventana.resizable(width=False, height=False)
+#creacion de ventana
+root = tkinter.Tk()
+root.title("scraper google maps")
+root.geometry("+350+150")#600x550
+root.resizable(width=False, height=False)
 
-    #seleccion de archivo excel
-    labelSelecFile = tkinter.Label(ventana, text = "selecciona un archivo de excel")
-    labelSelecFile.pack(pady=5)
+ventana = ttk.Frame(root)
+ventana.grid(column=0, row=0)
 
-    buttonFile = tkinter.Button(ventana, text = "selecciona un archivo", command= cargarArchivo(labelTextFile))
-    buttonFile.pack(pady=5)
+#seleccion de archivo excel
+labelSelecFile = ttk.Label(ventana, text = "selecciona un archivo de excel")
+buttonFile = ttk.Button(ventana, text = "selecciona un archivo", command= cargarArchivo)
+labelTextFile = ttk.Label(ventana, text = "")
 
-    labelTextFile = tkinter.Label(ventana, text = "")
-    labelTextFile.pack(pady=5)
+#indicar nombre de libro
+labelNameBook = ttk.Label(ventana, text = "nombre de libro")
+textNameBook = ttk.Entry(ventana)
 
-    #indicar nombre de libro
-    labelNameBook = tkinter.Label(ventana, text = "nombre de libro")
-    labelNameBook.pack(pady=10)
+#indicar fila de inicio
+labelInitRow = ttk.Label(ventana, text = "fila de inicio")
+textInitRow = ttk.Entry(ventana)
 
-    textNameBook = tkinter.Entry(ventana)
-    textNameBook.pack(pady=5)
+#indicar fila final
+labelEndRow = ttk.Label(ventana, text = "ultima fila")
+textEndRow = ttk.Entry(ventana)
 
-    #indicar fila de inicio
-    labelInitRow = tkinter.Label(ventana, text = "fila de inicio")
-    labelInitRow.pack(pady=10)
+#indicar columna inicio
+labelInitColum = ttk.Label(ventana, text = "columna de inicio")
+textInitColum = ttk.Entry(ventana)
 
-    textInitRow = tkinter.Entry(ventana)
-    textInitRow.pack(pady=5)
+#indicar fila final
+labelEndColum = ttk.Label(ventana, text = "columna final")
+textEndColum = ttk.Entry(ventana)
 
-    #indicar fila final
-    labelEndRow = tkinter.Label(ventana, text = "ultima fila")
-    labelEndRow.pack(pady=10)
+#indicar fila final
+labelColumWrite = ttk.Label(ventana, text = "columna de escritura")
+textColumWrite = ttk.Entry(ventana)
 
-    textEndRow = tkinter.Entry(ventana)
-    textEndRow.pack(pady=5)
-
-    #indicar columna inicio
-    labelInitColum = tkinter.Label(ventana, text = "columna de inicio")
-    labelInitColum.pack(pady=10)
-
-    textInitColum = tkinter.Entry(ventana)
-    textInitColum.pack(pady=5)
-
-    #indicar fila final
-    labelEndColum = tkinter.Label(ventana, text = "columna final")
-    labelEndColum.pack(pady=10)
-
-    textEndColum = tkinter.Entry(ventana)
-    textEndColum.pack(pady=5)
-
-    #indicar fila final
-    labelColumWrite = tkinter.Label(ventana, text = "columna de escritura")
-    labelColumWrite.pack(pady=10)
-
-    textColumWrite = tkinter.Entry(ventana)
-    textColumWrite.pack(pady=5)
+buttonScrapear = ttk.Button(ventana, text = "scrapear", command=llamarScraper)
 
 
-    ventana.mainloop()
 
-crearVentana()
+labelSelecFile.grid(column=1,row=0)
+buttonFile.grid(column=1,row=1)
+labelTextFile.grid(column=1,row=2)
+labelNameBook.grid(column=0,row=3)
+textNameBook.grid(column=0,row=4)
+labelInitRow.grid(column=1,row=3)
+textInitRow.grid(column=1,row=4)
+labelEndRow.grid(column=2,row=3)
+textEndRow.grid(column=2,row=4)
+labelInitColum.grid(column=0,row=5)
+textInitColum.grid(column=0,row=6)
+labelEndColum.grid(column=1,row=5)
+textEndColum.grid(column=1,row=6)
+labelColumWrite.grid(column=2,row=5)
+textColumWrite.grid(column=2,row=6)
+buttonScrapear.grid(column=1,row=7)
+
+
+
+
+
+#colInic = f'{textInitColum.get()}'
+#colFin = f'{textEndColum.get()}'
+#colCoords = f'{textColumWrite.get()}'
+#archivo = f'{labelTextFile.get()}'
+#libro = f'{textNameBook.get()}'
+
+ventana.mainloop()
+

@@ -13,6 +13,7 @@ from selenium.webdriver.common.by import By
 import openpyxl #libreria externa
 from lectorExcel import cargarArchivo
 
+
 ##########################################################
 #verificar version de google chrome instalada
 ##########################################################
@@ -41,7 +42,7 @@ def verificarDriverOnline():
 ##########################################################
 #descargar drivers 
 ##########################################################
-def descargaDriver(versionOnline):
+def descargaDriver(versionOnline,direccionDriver):
     
 
     remote_url = "https://chromedriver.storage.googleapis.com/" + versionOnline + "/" + "chromedriver_win32.zip"
@@ -52,8 +53,8 @@ def descargaDriver(versionOnline):
     archivo_en_zip = wget.download(remote_url, local_file)
 
     with zipfile.ZipFile(archivo_en_zip, 'r') as zip_ref:
-        zip_ref.extractall(direccionDriver + "chromedriver_win32_" + versionOnline) # you can specify the destination folder path here
-    # delete the zip file downloaded above
+        zip_ref.extractall(direccionDriver + "chromedriver_win32_" + versionOnline) 
+   
     os.remove(archivo_en_zip)
 
 
@@ -61,14 +62,14 @@ def descargaDriver(versionOnline):
 ##########################################################
 # verificar drivers actualizados
 ##########################################################
-def verificar_drivers_actualizados(chrome, online):
+def verificar_drivers_actualizados(chrome, online, direccionDriver):
     versionOnline = online.replace(".","_")
 
     if not(chrome == online[:10]):
-        descargaDriver(online)
+        descargaDriver(online, direccionDriver)
 
     if not(os.path.exists(direccionDriver + "\\chromedriver_win32_" + versionOnline)):
-        descargaDriver(online)
+        descargaDriver(online, direccionDriver)
 
     return versionOnline
 
@@ -95,7 +96,7 @@ def get_geocoder(url_location): # gets geographical lat/long coordinates
 ##########################################################
 # geocoder
 ##########################################################
-def scrape(ubicacion):
+def scrape(ubicacion, driver):
     try:
         WebDriverWait(driver, 15)\
             .until(EC.element_to_be_clickable((By.CSS_SELECTOR,
@@ -121,7 +122,7 @@ def scrape(ubicacion):
             .until(EC.element_to_be_clickable((By.CSS_SELECTOR,
                                                 'button.YismEf')))\
                                                 .click()
-                                                
+
         return "0,0"
 
 
@@ -130,48 +131,50 @@ def scrape(ubicacion):
 ##########################################################
 # main
 ##########################################################
-directorioActual = os.getcwdb()
-directorioActual = directorioActual.decode('utf-8').strip()
-direccionDriver = directorioActual+"\drivers\\"
+def scrapear(dirArchivo,libro , filaInicio, filaFinal, colInic, colFin, colCoords):
+    directorioActual = os.getcwdb()
+    directorioActual = directorioActual.decode('utf-8').strip()
+    direccionDriver = directorioActual+"\drivers\\"
 
-version = verificar_drivers_actualizados(verificaVersionChrome(),verificarDriverOnline())
+    version = verificar_drivers_actualizados(verificaVersionChrome(),verificarDriverOnline(), direccionDriver)
 
-#leer archivo excel
-archivo = cargarArchivo()
-libro = openpyxl.load_workbook(archivo)
-pagina = libro['AÑO 2018']
-libro.close
+    #leer archivo excel
+    ##archivo = cargarArchivo()
+    archivo = openpyxl.load_workbook(dirArchivo)
+    pagina = archivo[f'{libro}']
+    archivo.close
 
-# Opciones de navegación
-options =  webdriver.ChromeOptions()
-options.add_argument('--start-maximized')
-options.add_argument('--disable-extensions')
+    # Opciones de navegación
+    options =  webdriver.ChromeOptions()
+    options.add_argument('--start-maximized')
+    options.add_argument('--disable-extensions')
 
-#cargando driver
-driver = webdriver.Chrome(
-    service=Service(executable_path=direccionDriver+"chromedriver_win32_" + version + ".exe"), 
-    options = options)
+    #cargando driver
+    driver = webdriver.Chrome(
+        service=Service(executable_path=direccionDriver+"chromedriver_win32_" + version + ".exe"), 
+        options = options)
 
 
-#inicializar navegador
-driver.get("https://www.google.com/maps")
+    #inicializar navegador
+    driver.get("https://www.google.com/maps")
 
-coordenadas = []
+    coordenadas = []
 
-filaInicio = 1200
-filaFinal = 1286
-colInic = 'F'
-colFin = 'G'
-colCoords = 'H'
+    ##filaInicio = 1487
+    ##filaFinal = 1616
+    ##colInic = 'F'
+    ##colFin = 'G'
+    ##colCoords = 'H'
 
-for i in range(filaInicio,filaFinal):
-    lugar,ubicacion = pagina[f'{colInic}{i}:{colFin}{i}'][0]
-    pagina[f'{colCoords}{i}'] = scrape(lugar.value + ", " + ubicacion.value + " izucar de matamoros, puebla")
-    #time.sleep(1)
+    for i in range(filaInicio,filaFinal):
+        lugar,ubicacion = pagina[f'{colInic}{i}:{colFin}{i}'][0]
+        pagina[f'{colCoords}{i}'] = scrape(lugar.value + ", " + ubicacion.value + " izucar de matamoros, puebla",
+                                            driver)
+        #time.sleep(1)
 
-libro.save(archivo)
+    archivo.save(dirArchivo)
 
-time.sleep(3)
-driver.quit()
+    time.sleep(1)
+    driver.quit()
 
 
